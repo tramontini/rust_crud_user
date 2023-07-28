@@ -1,59 +1,61 @@
 mod classes;
 
 use crate::classes::user::User;
-use crate::classes::user::Field;
-use std::io;
+// use std::io;
 use bcrypt::hash;
+use axum::{
+    routing::{get, post},
+    Router,
+    response::Json,
+};
+
+use axum_macros::{
+    debug_handler
+};
 
 //TODO Criar struct com o New
-//TODO Salvar no Banco
 //TODO Usar API
+//TODO Salvar no Banco
 fn hash_password(password_string: &str) -> String{
     let password_string = hash(password_string, 10).expect("Failed to hash password");
     return password_string;
 }
 
-fn request_user_value(field: Field) -> String {
 
-    let mut input = String::new();
-    match field {
-        Field::Login => {
-            println!("Digite o login desejado: ");
-        }
-        Field::Password => {
-            println!("Digite a senha desejada: ");
-        },
-        Field::Name => {
-            println!("Digite seu nome completo: ");
-        },
-        Field::Age => {
-            println!("Digite a sua idade: ");
-        },
-        Field::Email =>{
-            println!("Digite o email desejado: ");
-        }
-    }
-    io::stdin().read_line(&mut input).expect("Failed to read line");
+// async fn save_user(Json(save_user)::Json<User>) {
+//     let user = Experiment::from_request(create_request);
+//
+// }
 
-    input.trim_end().to_owned()
-}
+#[axum_macros::debug_handler]
+async fn get_user() -> Json<User> {
 
-fn main() {
     let mut user = User {
-        login: request_user_value(Field::Login),
-        password: request_user_value(Field::Password),
-        name: request_user_value(Field::Name),
-        email: request_user_value(Field::Email),
-        age: request_user_value(Field::Age).parse::<u32>().unwrap(),
+        login: String::from("tramontini"),
+        password: hash_password(&String::from("teste")),
+        name: String::from("Matheus"),
+        email: String::from("Matheus Tramontini"),
+        age: 27,
         active: true
     };
 
-    println!("Login: {}", user.login);
-    println!("Name: {}", user.name);
-    println!("Email: {}", user.email);
-    println!("Age: {}", user.age);
-    println!("Active: {}", user.active);
-    user.password =  hash_password(&user.password);
-    println!("Senha Hasheada: {}", user.password);
+    return Json(user);
+}
+
+#[tokio::main]
+async fn main() {
+
+    print!("criando rota");
+    //TODO Usar API
+
+    let app = Router::new()
+        .route("/teste", get(|| async { "Hello, World!" }))
+        .route("/get_user", get(get_user));
+        //.route("/save_user", get(get_user));
+
+    axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
 
 }

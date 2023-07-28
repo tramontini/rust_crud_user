@@ -1,6 +1,14 @@
 //Coloca para poder fazer o match
 use serde::ser::{Serialize, Serializer, SerializeStruct};
-// PartialEq, Eq, Clone,  Debug, Copy
+
+#[derive(PartialEq, Eq, Clone,  Debug, Copy)]
+pub enum Field {
+    Login,
+    Password,
+    Name,
+    Email,
+    Age
+}
 
 #[derive(Serialize, Deserialize)]
 pub struct User{
